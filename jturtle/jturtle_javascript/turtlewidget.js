@@ -53,12 +53,12 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
 
         // onFrame variables
         this.oldPen=1;
-        this.oldX = 200;
+        this.oldX = this.canvas.width/2;
         this.oldY = 200;
         this.oldRotation=0;
         this.oldColour="black";
         this.newPen=1;
-        this.newX=200;
+        this.newX=this.canvas.width/2;
         this.newY=200;
         this.newRotation=0;
         this.newColour="black";
