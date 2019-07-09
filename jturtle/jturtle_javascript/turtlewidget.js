@@ -18,20 +18,40 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
                 grid.strokeColor = 'grey';
                 var start = new paper.Point(1,1);
                 grid.moveTo(start);
-                var canvasSize = that.canvas.width;
-                grid.lineTo(start.add([0,canvasSize]));
+                var canvasSizeX = that.canvas.width;
+                var canvasSizeY = that.canvas.height;
+                //grid.lineTo(start.add([0,canvasSizeY]));
+
+                //var i;
+                //for(i = 20; i <= canvasSizeX; i += 20){
+                //    grid.lineTo(start.add([i,canvasSizeY]));
+                //    grid.lineTo(start.add([i,0]));
+                //    grid.lineTo(start.add([i+20,0]));
+                //}
+                //for(i = 20; i <= canvasSize; i += 20){
+                //    grid.lineTo(start.add([canvasSizeX,i]));
+                //    grid.lineTo(start.add([0,i]));
+                //    grid.lineTo(start.add([0,i+20]));
+                //}
+                //
+                var start = new paper.Point(0,0)
+                grid.moveTo(start);
+                //grid.lineTo(start.add([0,canvasSizeY]));
+                //grid.lineTo(start.add([0,0]));
 
                 var i;
-                for(i = 20; i <= canvasSize; i += 20){
-                    grid.lineTo(start.add([i,canvasSize]));
+                for (i=0; i <= canvasSizeX; i += 20){
                     grid.lineTo(start.add([i,0]));
-                    grid.lineTo(start.add([i+20,0]));
+                    grid.lineTo(start.add([i,canvasSizeY]));
+                    grid.lineTo(start.add([i,0]));
                 }
-                for(i = 20; i <= canvasSize; i += 20){
-                    grid.lineTo(start.add([canvasSize,i]));
-                    grid.lineTo(start.add([0,i]));
-                    grid.lineTo(start.add([0,i+20]));
+
+                for (i=0; i <= canvasSizeY; i += 20){
+                  grid.lineTo(start.add([0,i]));
+                  grid.lineTo(start.add([canvasSizeX,i]));
+                  grid.lineTo(start.add([0,i]));
                 }
+
                 paper.view.draw();
             } else {
                 that.grid_on = false;
@@ -306,16 +326,18 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
             buttonDiv.attr('target','button-area');
 
             // create help button
-            var helpButton = $('<button/>');
-            helpButton.append("Help!");
-            buttonDiv.append(helpButton);
+            //var helpButton = $('<button/>');
+            this.helpButton = $('<button/>');
+            this.helpButton.append("Help!");
+            buttonDiv.append(this.helpButton);
 
             // create grid button
-            var gridButton = $('<button/>');
-            gridButton.attr('id','grid-element');
-            gridButton.attr('value', 0);
-            gridButton.append("Grid On/Off");
-            buttonDiv.append(gridButton);
+            //var gridButton = $('<button/>');
+            this.gridButton = $('<button/>');
+            this.gridButton.attr('id','grid-element');
+            this.gridButton.attr('value', 0);
+            this.gridButton.append("Grid On/Off");
+            buttonDiv.append(this.gridButton);
             toinsert.append(buttonDiv);
 
             var canvasDiv = $('<div/>');
@@ -327,22 +349,42 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
             //canvas.width  = this.model.get('width') + 1;
             canvas.height = 401;
             //canvas.height = this.model.get('height') + 1;
-            canvas.resize;
+            //canvas.resize;
 
             canvasDiv.append(canvas);
 
-            this.turtledrawing = new TurtleDrawing(canvas, gridButton, helpButton);
-            this.turtledrawing.points = this.model.get('points');
+            this.setup_complete = false;
+            this.canvas = canvas;
+
+            console.log("setup");
+            //this.turtledrawing = new TurtleDrawing(canvas, this.gridButton, this.helpButton);
+            //this.turtledrawing.points = this.model.get('points');
 
             this.$el.append(toinsert);
             window.debugturtle = this;
         },
         update: function(options) {
-            //console.log("doing update");
-            this.turtledrawing.points = this.model.get('points');
-            this.turtledrawing.canvas.width = this.model.get('width');
-            this.turtledrawing.canvas.height = this.model.get('height');
-            this.turtledrawing.canvas.resize;
+            console.log("doing update");
+
+            if (this.setup_complete===false) {
+              console.log("doing canvas update");
+              var width = this.model.get('width');
+              var height = this.model.get('height');
+              console.log(width);
+              console.log(height);
+
+              if (width > 0 && height > 0) {
+                this.canvas.width = width;
+                this.canvas.height = height;
+                this.turtledrawing = new TurtleDrawing(this.canvas, this.gridButton, this.helpButton);
+                this.setup_complete = true;
+              }
+            }
+            else {
+              this.turtledrawing.points = this.model.get('points');
+              //this.turtledrawing.canvas.width = this.model.get('width');
+              //this.turtledrawing.canvas.height = this.model.get('height');
+            }
         }
     });
 
