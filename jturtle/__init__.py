@@ -121,7 +121,7 @@ class Turtle(widgets.DOMWidget):
         if self.posX < self._min_x:
             self.posX = self._min_x
         if self.posY < self._min_y:
-            self.posY = self._max_y
+            self.posY = self._min_y
 
         if self.posX > self._max_x:
             self.posX = self._max_x
@@ -145,7 +145,7 @@ class Turtle(widgets.DOMWidget):
         if self.posX < self._min_x:
             self.posX = self._min_x
         if self.posY < self._min_y:
-            self.posY = self._max_y
+            self.posY = self._min_y
 
         if self.posX > self._max_x:
             self.posX = self._max_x
