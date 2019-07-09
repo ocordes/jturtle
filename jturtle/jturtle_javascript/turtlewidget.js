@@ -53,17 +53,17 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
 
         // onFrame variables
         this.oldPen=1;
-        this.oldX = this.canvas.width/2;
-        this.oldY = 200;
+        this.oldX = 0;
+        this.oldY = 0;
         this.oldRotation=0;
         this.oldColour="black";
         this.newPen=1;
-        this.newX=this.canvas.width/2;
-        this.newY=200;
+        this.newX=0;
+        this.newY=0;
         this.newRotation=0;
         this.newColour="black";
-        this.veryOldX = 200;
-        this.veryOldY = 200;
+        this.veryOldX = 0;
+        this.veryOldY = 0;
         this.turtleSpeed = 1;
 
         // counts each turtle command
@@ -72,7 +72,7 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
 
         this.path = new paper.Path();
         this.path.strokeWidth = 3;
-        this.path.add(new paper.Point(this.veryOldX, this.veryOldY));
+        this.path.add(new paper.Point(this.veryOldX+this.canvas.width/2, this.veryOldY+this.canvas.height/2));
 
         /*
            nextCount is the first function to run for each turtle command. It sets the
@@ -104,7 +104,7 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
                 //Changing pen - start a new path
                 this.path = new paper.Path();
                 this.path.strokeWidth = 3;
-                this.path.add(new paper.Point(this.oldX, this.oldY));
+                this.path.add(new paper.Point(this.oldX+this.canvas.width/2, this.oldY+this.canvas.height/2));
             }
 
             // Good test command to see what the input is from the string
@@ -115,8 +115,8 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
         TurtleDrawing.prototype.draw_turtle = function() {
             //builds the initial turtle icon
             if(this.turtleShow===1){
-                var oldX = this.oldX;
-                var oldY = this.oldY;
+                var oldX = this.oldX + this.canvas.width/2;
+                var oldY = this.oldY + this.canvas.height/2;
                 var turtleColour = this.turtleColour;
 
                 var tail = new paper.Path.RegularPolygon(new paper.Point(oldX-11,oldY), 3, 3);
@@ -231,7 +231,7 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
 
             //rotate turtle, current is the exact centre of the turtle
             if (changRot !== 0 && that.turtleShow===1){
-                var current = new paper.Point(that.oldX, that.oldY);
+                var current = new paper.Point(that.oldX+that.canvas.width/2, that.oldY+that.canvas.height/2);
 
                 if(changRot < 0) {
                     // Turning left
@@ -280,13 +280,15 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
             if (that.newY !== that.oldY || that.newX !== that.oldX || that.changRot !== 0){
 
                 if(that.newPen == 1){
-                    that.path.add(new paper.Point(that.oldX, that.oldY));
-                    that.turtle.position = new paper.Point(that.oldX, that.oldY);
+                    var oldX = that.oldX + that.canvas.width/2;
+                    var oldY = that.oldY + that.canvas.height/2;
+                    that.path.add(new paper.Point(oldX, oldY));
+                    that.turtle.position = new paper.Point(oldX, oldY);
                     that.path.strokeColor = that.newColour;
                 }
             } else {
                 // done animating this command
-                that.path.add(new paper.Point(that.newX, that.newY));
+                that.path.add(new paper.Point(that.newX+that.canvas.width/2, that.newY+that.canvas.height/2));
                 that.nextCount();
             }
         });
@@ -340,6 +342,7 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
             this.turtledrawing.points = this.model.get('points');
             this.turtledrawing.canvas.width = this.model.get('width');
             this.turtledrawing.canvas.height = this.model.get('height');
+            this.turtledrawing.canvas.resize;
         }
     });
 

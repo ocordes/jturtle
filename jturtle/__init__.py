@@ -50,6 +50,11 @@ class Turtle(widgets.DOMWidget):
         self.points = []
         self.home()
 
+        self._min_x = -width/2 + self.OFFSET
+        self._max_x = width/2 - self.OFFSET
+        self._min_y = -height/2 + self.OFFSET
+        self._max_y = height/2 - self.OFFSET
+
 
 
     def pendown(self):
@@ -113,15 +118,15 @@ class Turtle(widgets.DOMWidget):
         self.posX += round(num * math.sin(math.radians(self.bearing)), 1)
         self.posY -= round(num * math.cos(math.radians(self.bearing)), 1)
 
-        if self.posX < Turtle.OFFSET:
-            self.posX = Turtle.OFFSET
-        if self.posY < Turtle.OFFSET:
-            self.posY = Turtle.OFFSET
+        if self.posX < self._min_x:
+            self.posX = self._min_x
+        if self.posY < self._min_y:
+            self.posY = self._max_y
 
-        if self.posX > self._width - Turtle.OFFSET:
-            self.posX = self._width - Turtle.OFFSET
-        if self.posY > self._height - Turtle.OFFSET:
-            self.posY = self._height - Turtle.OFFSET
+        if self.posX > self._max_x:
+            self.posX = self._max_x
+        if self.posY > self._max_y:
+            self.posY = self._max_y
 
         self.b_change = 0
         self._add_point()
@@ -136,15 +141,16 @@ class Turtle(widgets.DOMWidget):
         self.posX -= round(num * math.sin(math.radians(self.bearing)), 1)
         self.posY += round(num * math.cos(math.radians(self.bearing)), 1)
 
-        if self.posX < Turtle.OFFSET:
-            self.posX = Turtle.OFFSET
-        if self.posY < Turtle.OFFSET:
-            self.posY = Turtle.OFFSET
 
-        if self.posX > self._width - Turtle.OFFSET:
-            self.posX = self._width - Turtle.OFFSET
-        if self.posY > self._height - Turtle.OFFSET:
-            self.posY = self._height - Turtle.OFFSET
+        if self.posX < self._min_x:
+            self.posX = self._min_x
+        if self.posY < self._min_y:
+            self.posY = self._max_y
+
+        if self.posX > self._max_x:
+            self.posX = self._max_x
+        if self.posY > self._max_y:
+            self.posY = self._max_y
 
         self.b_change = 0
         self._add_point()
@@ -167,6 +173,18 @@ class Turtle(widgets.DOMWidget):
         """
         self.posX = x
         self.posY = y
+
+        # self check of position inside canvas
+        if self.posX < self._min_x:
+            self.posX = self._min_x
+        if self.posY < self._min_y:
+            self.posY = self._max_y
+
+        if self.posX > self._max_x:
+            self.posX = self._max_x
+        if self.posY > self._max_y:
+            self.posY = self._max_y
+
         if bearing is None:
             self._add_point()
         elif isinstance(bearing, int):
@@ -229,8 +247,8 @@ class Turtle(widgets.DOMWidget):
 
             t.home()
         '''
-        self.posX = self._width/2
-        self.posY = self._height/2
+        self.posX = 0
+        self.posY = 0
         if 90 < self.bearing <=270:
             self.b_change = - (self.bearing - 90)
         else:
