@@ -1,9 +1,13 @@
 define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], function(paperlib, widget){
 
-    function TurtleDrawing(canvas_element, grid_button, help_button) {
+    function TurtleDrawing(canvas_element, width, height, grid_button, help_button) {
         this.points = [];
         this.canvas = canvas_element;
         this.canvas.style.background = '#99CCFF';
+        this.width = width
+        this.height = height
+        this.middle_X = width/2
+        this.middle_Y = height/2
         paper.setup(this.canvas);
 
         /* adds grid for user to turn off / on, helps see what the turtle is doing */
@@ -18,37 +22,20 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
                 grid.strokeColor = 'grey';
                 var start = new paper.Point(1,1);
                 grid.moveTo(start);
-                var canvasSizeX = that.canvas.width;
-                var canvasSizeY = that.canvas.height;
-                //grid.lineTo(start.add([0,canvasSizeY]));
 
-                //var i;
-                //for(i = 20; i <= canvasSizeX; i += 20){
-                //    grid.lineTo(start.add([i,canvasSizeY]));
-                //    grid.lineTo(start.add([i,0]));
-                //    grid.lineTo(start.add([i+20,0]));
-                //}
-                //for(i = 20; i <= canvasSize; i += 20){
-                //    grid.lineTo(start.add([canvasSizeX,i]));
-                //    grid.lineTo(start.add([0,i]));
-                //    grid.lineTo(start.add([0,i+20]));
-                //}
-                //
                 var start = new paper.Point(0,0)
                 grid.moveTo(start);
-                //grid.lineTo(start.add([0,canvasSizeY]));
-                //grid.lineTo(start.add([0,0]));
 
                 var i;
-                for (i=0; i <= canvasSizeX; i += 20){
+                for (i=0; i <= that.width; i += 20){
                     grid.lineTo(start.add([i,0]));
-                    grid.lineTo(start.add([i,canvasSizeY]));
+                    grid.lineTo(start.add([i,that.height]));
                     grid.lineTo(start.add([i,0]));
                 }
 
-                for (i=0; i <= canvasSizeY; i += 20){
+                for (i=0; i <= that.height; i += 20){
                   grid.lineTo(start.add([0,i]));
-                  grid.lineTo(start.add([canvasSizeX,i]));
+                  grid.lineTo(start.add([that.width,i]));
                   grid.lineTo(start.add([0,i]));
                 }
 
@@ -92,7 +79,7 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
 
         this.path = new paper.Path();
         this.path.strokeWidth = 3;
-        this.path.add(new paper.Point(this.veryOldX+this.canvas.width/2, this.veryOldY+this.canvas.height/2));
+        this.path.add(new paper.Point(this.veryOldX+this.middle_X, this.veryOldY+this.middle_Y));
 
         /*
            nextCount is the first function to run for each turtle command. It sets the
@@ -124,7 +111,7 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
                 //Changing pen - start a new path
                 this.path = new paper.Path();
                 this.path.strokeWidth = 3;
-                this.path.add(new paper.Point(this.oldX+this.canvas.width/2, this.oldY+this.canvas.height/2));
+                this.path.add(new paper.Point(this.oldX+this.middle_X, this.oldY+this.middle_Y));
             }
 
             // Good test command to see what the input is from the string
@@ -135,8 +122,8 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
         TurtleDrawing.prototype.draw_turtle = function() {
             //builds the initial turtle icon
             if(this.turtleShow===1){
-                var oldX = this.oldX + this.canvas.width/2;
-                var oldY = this.oldY + this.canvas.height/2;
+                var oldX = this.oldX + this.middle_X;
+                var oldY = this.oldY + this.middle_Y;
                 var turtleColour = this.turtleColour;
 
                 var tail = new paper.Path.RegularPolygon(new paper.Point(oldX-11,oldY), 3, 3);
@@ -176,6 +163,7 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
                 this.turtle = new paper.Group([circle1,circle2,circle3,circle4,circle5,circle6,tail]);
             }
         };
+        console.log("debug10 " + this.canvas.width);
         this.draw_turtle();
 
         /*
@@ -251,7 +239,7 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
 
             //rotate turtle, current is the exact centre of the turtle
             if (changRot !== 0 && that.turtleShow===1){
-                var current = new paper.Point(that.oldX+that.canvas.width/2, that.oldY+that.canvas.height/2);
+                var current = new paper.Point(that.oldX+that.middle_X, that.oldY+that.middle_Y);
 
                 if(changRot < 0) {
                     // Turning left
@@ -300,15 +288,15 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
             if (that.newY !== that.oldY || that.newX !== that.oldX || that.changRot !== 0){
 
                 if(that.newPen == 1){
-                    var oldX = that.oldX + that.canvas.width/2;
-                    var oldY = that.oldY + that.canvas.height/2;
+                    var oldX = that.oldX + that.middle_X;
+                    var oldY = that.oldY + that.middle_Y;
                     that.path.add(new paper.Point(oldX, oldY));
                     that.turtle.position = new paper.Point(oldX, oldY);
                     that.path.strokeColor = that.newColour;
                 }
             } else {
                 // done animating this command
-                that.path.add(new paper.Point(that.newX+that.canvas.width/2, that.newY+that.canvas.height/2));
+                that.path.add(new paper.Point(that.newX+that.middle_X, that.newY+that.middle_Y));
                 that.nextCount();
             }
         });
@@ -374,16 +362,16 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
               console.log(height);
 
               if (width > 0 && height > 0) {
+                //console.log("debug1 " + this.canvas.width);
                 this.canvas.width = width;
                 this.canvas.height = height;
-                this.turtledrawing = new TurtleDrawing(this.canvas, this.gridButton, this.helpButton);
+                //console.log("debug2 " + this.canvas.width);
+                this.turtledrawing = new TurtleDrawing(this.canvas, width, height, this.gridButton, this.helpButton);
                 this.setup_complete = true;
               }
             }
             else {
               this.turtledrawing.points = this.model.get('points');
-              //this.turtledrawing.canvas.width = this.model.get('width');
-              //this.turtledrawing.canvas.height = this.model.get('height');
             }
         }
     });
