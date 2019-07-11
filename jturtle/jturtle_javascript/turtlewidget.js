@@ -81,6 +81,10 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
         this.path.strokeWidth = 3;
         this.path.add(new paper.Point(this.veryOldX+this.middle_X, this.veryOldY+this.middle_Y));
 
+
+        this.figure = new paper.Group();
+        this.figure.addChild(this.path);
+
         /*
            nextCount is the first function to run for each turtle command. It sets the
            global variables to each of the values pulled from the intial string.
@@ -90,6 +94,7 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
             if (count+1 >= this.points.length) {
                 return;
             }
+            console.log("nextCount start");
             this.oldPen = this.points[count].p;
             this.oldColour = this.points[count].lc;
             this.oldX = this.points[count].x;
@@ -112,8 +117,10 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
                 this.path = new paper.Path();
                 this.path.strokeWidth = 3;
                 this.path.add(new paper.Point(this.oldX+this.middle_X, this.oldY+this.middle_Y));
+                this.figure.addChild(this.path);
             }
 
+            console.log("nectCount ready");
             // Good test command to see what the input is from the string
            //alert("old:"+oldX +" "+ oldY + " " + oldRotation + " New:" + newX + " " +newY + " " + changRot+ " " +turtleSpeed );
 
@@ -163,7 +170,48 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
                 this.turtle = new paper.Group([circle1,circle2,circle3,circle4,circle5,circle6,tail]);
             }
         };
-        console.log("debug10 " + this.canvas.width);
+
+        TurtleDrawing.prototype.clear = function (){
+          console.log("turtle drawing clear");
+
+          this.turtle.translate(-this.newX,-this.newY);
+          this.lineSize = 2;
+          this.rotateSpeed = 1;
+          this.turtleColour ='#006900' ;
+          this.turtleShow = 1;
+
+          // onFrame variables
+          this.oldPen=1;
+          this.oldX = 0;
+          this.oldY = 0;
+          this.oldRotation=0;
+          this.oldColour="black";
+          this.newPen=1;
+          this.newX=0;
+          this.newY=0;
+          this.newRotation=0;
+          this.newColour="black";
+          this.veryOldX = 0;
+          this.veryOldY = 0;
+          this.turtleSpeed = 1;
+
+          // remove the old figure
+          //this.figure.remove();
+          //this.figure = new paper.Group();
+          this.figure.removeChildren();
+          this.path = new paper.Path();
+          this.path.strokeWidth = 3;
+          this.path.add(new paper.Point(this.veryOldX+this.middle_X, this.veryOldY+this.middle_Y));
+          this.figure.addChild(this.path);
+          this.points = [];
+          // counts each turtle command
+          this.count = 0;
+          this.changRot = 0;
+          console.log("clear ready");
+        }
+
+
+        /* initially draw the turtle */
         this.draw_turtle();
 
         /*
@@ -191,24 +239,21 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
                 frameY = 1;
                 frameX = 1;
             } else if (changX < changY) {
-                // make ratio for Y
-                frameX = (changX/changY);
-                frameY = 1;
-            } else {
-                // make ratio for X
-                frameY = (changY/changX);
-                frameX = 1;
-            }
-            //alert("changX: " + changX + " chanY: " + changY )
+                      // make ratio for Y
+                      frameX = (changX/changY);
+                      frameY = 1;
+                    } else {
+                      // make ratio for X
+                      frameY = (changY/changX);
+                      frameX = 1;
+                    }
+
             if((changX<turtleSpeed) && that.changRot===0 && changX!==0){
 
                 if ((changX<=2) && changRot===0 && changX!==0){
                     that.oldX=that.newX;
                     that.oldY=that.newY;
                 }
-                //if (((Math.abs(oldX-newX))<=(turtleSpeed/2)) && changRot==0 && changX!=0){
-                //	turtleSpeed=(Math.abs(oldX-newX));
-                //}
                 turtleSpeed = changX;
             }
 
@@ -218,24 +263,13 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
                     that.oldX = that.newX;
                     that.oldY = that.newY;
                 }
-                //if (((Math.abs(oldY-newY))<=(turtleSpeed/2)) && changRot==0 && changY!=0){
-                //	turtleSpeed=(Math.abs(oldX-newX));
-                //}
                 turtleSpeed = changY;
-
             }
 
-            //if( changX<changY && (Math.abs(oldY-newY)-10)<turtleSpeed ){
-            //	turtleSpeed=1;
+            else if (that.changRot!==0 && (Math.abs(changRot))<turtleSpeed){
+                    turtleSpeed=1;
 
-            //}
-
-            else if  (that.changRot!==0 && (Math.abs(changRot))<turtleSpeed){
-                turtleSpeed=1;
-
-            }
-            //frameX *= turtleSpeed;
-            //frameY *= turtleSpeed;
+                  }
 
             //rotate turtle, current is the exact centre of the turtle
             if (changRot !== 0 && that.turtleShow===1){
@@ -284,7 +318,7 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
 
             // prints the little circles every frame until we reach the correct point
             // to create the line
-            //alert(" ("+ newY+ ")  "+ oldY+ "  where brooklyn at " +" ("+ newX+ ")  "+ oldX + " speed:"+ turtleSpeed + " changRot:" + changRot);
+            console.log("draw: "+String(that.newX)+" "+String(that.oldX)+" "+String(that.newY)+" "+String(that.oldY)+" "+String(that.changRot));
             if (that.newY !== that.oldY || that.newX !== that.oldX || that.changRot !== 0){
 
                 if(that.newPen == 1){
@@ -293,10 +327,12 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
                     that.path.add(new paper.Point(oldX, oldY));
                     that.turtle.position = new paper.Point(oldX, oldY);
                     that.path.strokeColor = that.newColour;
+                    that.figure.addChild(that.path);
                 }
             } else {
                 // done animating this command
                 that.path.add(new paper.Point(that.newX+that.middle_X, that.newY+that.middle_Y));
+                that.figure.addChild(that.path);
                 that.nextCount();
             }
         });
@@ -350,6 +386,23 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
 
             this.$el.append(toinsert);
             window.debugturtle = this;
+
+            this.listenTo(this.model, 'change:toclear', this._clear_changed, this);
+            this.listenTo(this.model, 'change:points', this._points_changed, this);
+        },
+        _points_changed: function() {
+            console.log("points update");
+            this.turtledrawing.points = this.model.get('points');
+        },
+        _clear_changed: function() {
+            var old_value = this.model.previous('toclear');
+            var new_value = this.model.get('toclear');
+            console.log(String(old_value) + ' -> ' + String(new_value));
+            console.log("clear update");
+            if (this.setup_complete)
+            {
+              this.turtledrawing.clear();
+            }
         },
         update: function(options) {
             console.log("doing update");
@@ -370,9 +423,9 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
                 this.setup_complete = true;
               }
             }
-            else {
-              this.turtledrawing.points = this.model.get('points');
-            }
+            //else {
+            //  this.turtledrawing.points = this.model.get('points');
+            //}
         }
     });
 

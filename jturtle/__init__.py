@@ -3,7 +3,7 @@ import math
 
 from ipywidgets import widgets
 from notebook import nbextensions
-from traitlets import Unicode, List, Int
+from traitlets import Unicode, List, Int, Bool
 from IPython.display import display
 
 __version__ = '0.5.1'
@@ -23,6 +23,7 @@ class Turtle(widgets.DOMWidget):
     # define the canvas size
     width = Int(sync=True)
     height = Int(sync=True)
+    toclear = Bool(sync=True)
 
     SIZE = 400
     OFFSET = 20
@@ -48,6 +49,7 @@ class Turtle(widgets.DOMWidget):
         self.color = "black"
         self.bearing = 90
         self.points = []
+        self.toclear = True
         self.home()
 
         self._min_x = -width/2 + self.OFFSET
@@ -56,6 +58,12 @@ class Turtle(widgets.DOMWidget):
         self._max_y = height/2 - self.OFFSET
 
 
+    #--------------------------------------------------------------------------
+
+    """
+    pen controls
+
+    """
 
     def pendown(self):
         '''Put down the pen. Turtles start with their pen down.
@@ -66,6 +74,9 @@ class Turtle(widgets.DOMWidget):
         '''
         self.pen = 1
 
+    pd = pendown
+    down = pendown
+
     def penup(self):
         '''Lift up the pen.
 
@@ -74,6 +85,56 @@ class Turtle(widgets.DOMWidget):
             t.penup()
         '''
         self.pen = 0
+    pu = penup
+    up = penup
+
+
+    def isdown(self):
+        """Return True if pen is down, False if it’s up.
+
+        Example::
+
+            print(t.isdown())
+        """
+        return self.pen == 1
+
+    #--------------------------------------------------------------------------
+
+    """
+    drawing control
+
+    """
+
+    def reset(self):
+        """
+        Delete the turtle’s drawings from the screen, re-center the turtle
+        and set variables to the default values.
+
+        Example::
+
+            t.reset()
+        """
+        self.clear()
+        self.home()
+    resetscreen = reset
+
+
+    def clear(self):
+        """
+        Delete the turtle’s drawings from the screen. Do not move turtle.
+        State and position of the turtle as well as drawings of other turtles
+        are not affected.
+
+        Example::
+
+            t.clear()
+        """
+        # the widget is reacting on a change event not on the value, so simply
+        # change the value!
+        self.points = []
+        self.toclear = not self.toclear
+    clearscreen = clear
+
 
     def speed(self, speed):
         '''Change the speed of the turtle (range 1-10).
@@ -83,6 +144,7 @@ class Turtle(widgets.DOMWidget):
             t.speed(10) # Full speed
         '''
         self.speedVar = min(max(1, speed), 10)
+
 
     def right(self, num):
         '''Turn the Turtle num degrees to the right.
