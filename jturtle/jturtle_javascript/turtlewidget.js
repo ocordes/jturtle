@@ -1,3 +1,18 @@
+/*
+
+turtlewidget.js
+
+JavaScript extension for jupyter notebooks
+
+
+written by: Oliver Cordes 2019-07-05
+changed by: Oliver Cordes 2019-07-12
+
+
+The code is taken from takluyver/mobilechelonian git repo but now heavily
+modified and improved to work with the jturtle python module.
+
+*/
 define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], function(paperlib, widget){
 
     function TurtleDrawing(canvas_element, width, height, grid_button, help_button) {
@@ -49,7 +64,7 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
 
         this.help_button = help_button;
         this.help_button.click(function (event){
-            alert("example:\nfrom NewTurtle import Turtle\nt = Turtle()\nt.forward(50)\nfor help:\nhelp(Turtle)");
+            alert("example:\nfrom jturtle import Turtle\nt = Turtle()\nt.forward(50)\nfor help:\nhelp(Turtle)");
         });
 
         // some variable to play with still
@@ -172,43 +187,56 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
         };
 
         TurtleDrawing.prototype.clear = function (){
-          console.log("turtle drawing clear");
-
-          this.turtle.translate(-this.newX,-this.newY);
-          this.lineSize = 2;
-          this.rotateSpeed = 1;
-          this.turtleColour ='#006900' ;
-          this.turtleShow = 1;
-
-          // onFrame variables
-          this.oldPen=1;
-          this.oldX = 0;
-          this.oldY = 0;
-          this.oldRotation=0;
-          this.oldColour="black";
-          this.newPen=1;
-          this.newX=0;
-          this.newY=0;
-          this.newRotation=0;
-          this.newColour="black";
-          this.veryOldX = 0;
-          this.veryOldY = 0;
-          this.turtleSpeed = 1;
-
-          // remove the old figure
-          //this.figure.remove();
-          //this.figure = new paper.Group();
           this.figure.removeChildren();
           this.path = new paper.Path();
           this.path.strokeWidth = 3;
-          this.path.add(new paper.Point(this.veryOldX+this.middle_X, this.veryOldY+this.middle_Y));
+          this.path.add(new paper.Point(this.newX+this.middle_X, this.newY+this.middle_Y));
           this.figure.addChild(this.path);
           this.points = [];
-          // counts each turtle command
           this.count = 0;
+        };
+
+        TurtleDrawing.prototype.reset = function (){
+          console.log("turtle drawing reset");
+
+          /* reset the turtle to the home position */
+          this.turtle.translate(-this.newX,-this.newY);
+          var current = new paper.Point(this.middle_X,that.middle_Y);
+          this.turtle.rotate(-this.newRotation,current);
+          this.oldX = 0;
+          this.oldY = 0;
+          this.oldRotation=0;
+          this.veryOldX = 0;
+          this.veryOldY = 0;
+          this.newX=0;
+          this.newY=0;
+          this.newRotation=0;
+          this.turtleSpeed = 1;
+          this.rotateSpeed = 1;
+          this.turtleColour ='#006900' ;
+          this.turtleShow = 1;
           this.changRot = 0;
-          console.log("clear ready");
-        }
+
+
+          // reset the pen attributes
+          this.lineSize = 2;
+          this.oldPen=1;
+          this.oldColour="black";
+          this.newPen=1;
+          this.newColour="black";
+
+
+          // remove the old figure
+          this.figure.removeChildren();
+          this.path = new paper.Path();
+          this.path.strokeWidth = 3;
+          this.path.add(new paper.Point(this.middle_X, this.middle_Y));
+          this.figure.addChild(this.path);
+
+          // no points to work on ...
+          this.points = [];
+          this.count = 0;
+        };
 
 
         /* initially draw the turtle */
@@ -279,10 +307,12 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
                     // Turning left
                     that.changRot += that.rotateSpeed*turtleSpeed;
                     that.turtle.rotate(-that.rotateSpeed*turtleSpeed,current);
+                    that.newRotation -= that.rotateSpeed*turtleSpeed;
                 } else {
                     // Turning right
                     that.changRot -= that.rotateSpeed*turtleSpeed;
                     that.turtle.rotate(that.rotateSpeed*turtleSpeed,current);
+                    that.newRotation += that.rotateSpeed*turtleSpeed;
                 }
             } else {
                 //if turtle is off we have to manually set old rotation
@@ -318,7 +348,7 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
 
             // prints the little circles every frame until we reach the correct point
             // to create the line
-            console.log("draw: "+String(that.newX)+" "+String(that.oldX)+" "+String(that.newY)+" "+String(that.oldY)+" "+String(that.changRot));
+            //console.log("draw: "+String(that.newX)+" "+String(that.oldX)+" "+String(that.newY)+" "+String(that.oldY)+" "+String(that.changRot));
             if (that.newY !== that.oldY || that.newX !== that.oldX || that.changRot !== 0){
 
                 if(that.newPen == 1){
@@ -388,6 +418,7 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
             window.debugturtle = this;
 
             this.listenTo(this.model, 'change:toclear', this._clear_changed, this);
+            this.listenTo(this.model, 'change:toreset', this._reset_changed, this);
             this.listenTo(this.model, 'change:points', this._points_changed, this);
         },
         _points_changed: function() {
@@ -402,6 +433,13 @@ define(['nbextensions/jturtle_javascript/paper', "@jupyter-widgets/base"], funct
             if (this.setup_complete)
             {
               this.turtledrawing.clear();
+            }
+        },
+        _reset_changed: function() {
+            console.log("reset update");
+            if (this.setup_complete)
+            {
+              this.turtledrawing.reset();
             }
         },
         update: function(options) {

@@ -24,6 +24,7 @@ class Turtle(widgets.DOMWidget):
     width = Int(sync=True)
     height = Int(sync=True)
     toclear = Bool(sync=True)
+    toreset = Bool(sync=True)
 
     SIZE = 400
     OFFSET = 20
@@ -50,6 +51,7 @@ class Turtle(widgets.DOMWidget):
         self.bearing = 90
         self.points = []
         self.toclear = True
+        self.toreset = True
         self.home()
 
         self._min_x = -width/2 + self.OFFSET
@@ -114,8 +116,10 @@ class Turtle(widgets.DOMWidget):
 
             t.reset()
         """
-        self.clear()
+        self.points = []
+        self.toreset = not self.toreset
         self.home()
+
     resetscreen = reset
 
 
@@ -132,6 +136,7 @@ class Turtle(widgets.DOMWidget):
         # the widget is reacting on a change event not on the value, so simply
         # change the value!
         self.points = []
+        self._add_point()    # add the current point
         self.toclear = not self.toclear
     clearscreen = clear
 
